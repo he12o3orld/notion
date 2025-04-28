@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-            background-color: #f7f7f7;
+            background-color: #ffffff; /* 匹配Notion白色背景 */
             margin: 0;
             padding: 0;
             display: flex;
@@ -20,13 +20,10 @@
             width: 100%;
             max-width: 1200px;
             height: auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             padding: 12px;
             gap: 12px;
             box-sizing: border-box;
-            overflow: hidden;
+            overflow: hidden; /* 防止溢出 */
         }
         .left-panel {
             width: 160px;
@@ -208,9 +205,7 @@
         try {
             updateTime();
             updateProgress();
-            // 每秒更新时间
             setInterval(updateTime, 1000);
-            // 每分钟更新进度条
             setInterval(updateProgress, 60000);
         } catch (e) {
             console.error('Initialization Error:', e);
