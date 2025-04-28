@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -57,12 +18,14 @@
         }
         .container {
             display: flex;
-            width: 800px;
+            width: 100%; /* 占满页面宽度 */
+            max-width: 1200px; /* 最大宽度限制，防止超宽屏幕过分拉伸 */
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             padding: 24px;
             gap: 24px;
+            box-sizing: border-box;
         }
         .left-panel {
             width: 220px;
@@ -105,7 +68,7 @@
         }
         .progress-fill {
             height: 100%;
-            background: #000000; /* 改为黑色 */
+            background: #000000; /* 黑色进度条 */
             transition: width 0.3s ease;
         }
         .progress-text {
@@ -113,6 +76,20 @@
             font-size: 12px;
             color: #6b6b6b;
             text-align: right;
+        }
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+                padding: 16px;
+            }
+            .left-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e6e6e6;
+                padding-right: 0;
+                padding-bottom: 16px;
+            }
         }
     </style>
 </head>
