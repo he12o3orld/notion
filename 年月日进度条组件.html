@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-            background-color: #ffffff; /* 匹配Notion白色背景 */
+            background-color: #ffffff;
             margin: 0;
             padding: 0;
             display: flex;
@@ -20,6 +20,10 @@
             width: 100%;
             max-width: 1200px;
             height: auto;
+/*             background: white;
+            border: 1px solid #e6e6e6;
+            border-radius: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
             padding: 12px;
             gap: 12px;
             box-sizing: border-box;
@@ -119,7 +123,7 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="week-progress"></div>
                 </div>
-                <div class="progress-text" id="week-text">0/24</div>
+                <div class="progress-text" id="week-text">0/7</div>
             </div>
         </div>
     </div>
@@ -175,27 +179,28 @@
                 const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
                 const daysInYear = isLeapYear ? 366 : 365;
 
-                // 年进度
+                // 年进度（包含今天）
                 const startOfYear = new Date(year, 0, 1);
-                const daysPassedYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                const daysPassedYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1; // 包含今天
                 const yearProgress = (daysPassedYear / daysInYear) * 100;
                 document.getElementById('year-progress').style.width = `${yearProgress}%`;
                 document.getElementById('year-text').textContent = `${daysPassedYear}/${daysInYear}`;
 
-                // 月进度
+                // 月进度（包含今天）
                 const startOfMonth = new Date(year, now.getMonth(), 1);
                 const endOfMonth = new Date(year, now.getMonth() + 1, 0);
                 const daysInMonth = endOfMonth.getDate();
-                const daysPassedMonth = now.getDate() - 1;
+                const daysPassedMonth = now.getDate(); // 包含今天
                 const monthProgress = (daysPassedMonth / daysInMonth) * 100;
                 document.getElementById('month-progress').style.width = `${monthProgress}%`;
                 document.getElementById('month-text').textContent = `${daysPassedMonth}/${daysInMonth}`;
 
-                // 周进度（基于日，显示小时）
-                const hoursPassed = now.getHours() + now.getMinutes() / 60;
-                const weekProgress = (hoursPassed / 24) * 100;
+                // 周进度（7天周期）
+                const daysPassedWeek = now.getDay() === 0 ? 7 : now.getDay(); // 周日为7，周一为1
+                const daysInWeek = 7;
+                const weekProgress = (daysPassedWeek / daysInWeek) * 100;
                 document.getElementById('week-progress').style.width = `${weekProgress}%`;
-                document.getElementById('week-text').textContent = `${Math.floor(hoursPassed)}/24`;
+                document.getElementById('week-text').textContent = `${daysPassedWeek}/${daysInWeek}`;
             } catch (e) {
                 console.error('updateProgress Error:', e);
             }
