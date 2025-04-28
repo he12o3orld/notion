@@ -10,85 +10,88 @@
             font-family: 'Roboto', 'Noto Sans SC', sans-serif;
             background-color: #f7f7f7;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            align-items: flex-start;
         }
         .container {
             display: flex;
-            width: 100%; /* 占满页面宽度 */
-            max-width: 1200px; /* 最大宽度限制，防止超宽屏幕过分拉伸 */
+            width: 100%;
+            max-width: 1200px;
+            height: auto;
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 24px;
-            gap: 24px;
+            padding: 12px;
+            gap: 12px;
             box-sizing: border-box;
+            overflow: hidden;
         }
         .left-panel {
-            width: 220px;
+            width: 160px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             border-right: 1px solid #e6e6e6;
-            padding-right: 24px;
+            padding-right: 12px;
         }
         .right-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 12px;
         }
         .weekday, .time {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 500;
             color: #2d2d2d;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
         }
         .progress-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
         }
         .progress-label {
-            width: 60px;
-            font-size: 14px;
+            width: 50px;
+            font-size: 11px;
             font-weight: 500;
             color: #4a4a4a;
             text-transform: uppercase;
         }
         .progress-bar {
             flex: 1;
-            height: 12px;
+            height: 8px;
             background: #e6e6e6;
-            border-radius: 6px;
+            border-radius: 4px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
-            background: #000000; /* 黑色进度条 */
+            background: #000000;
             transition: width 0.3s ease;
         }
         .progress-text {
-            width: 60px;
-            font-size: 12px;
+            width: 50px;
+            font-size: 9px;
             color: #6b6b6b;
             text-align: right;
         }
-        /* 响应式调整 */
         @media (max-width: 600px) {
             .container {
                 flex-direction: column;
-                padding: 16px;
+                padding: 10px;
             }
             .left-panel {
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid #e6e6e6;
                 padding-right: 0;
-                padding-bottom: 16px;
+                padding-bottom: 10px;
+            }
+            .right-panel {
+                gap: 10px;
             }
         }
     </style>
@@ -124,6 +127,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
@@ -149,7 +153,7 @@
                     csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                     return csv;
                 } catch (e) {
-                    console.error(e);
+                    console.error('XLSX Error:', e);
                     return "";
                 }
             }
@@ -157,49 +161,60 @@
         }
 
         function updateTime() {
-            const now = new Date();
-            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            document.getElementById('weekday').textContent = weekdays[now.getDay()];
-            document.getElementById('time').textContent = now.toTimeString().slice(0, 8);
+            try {
+                const now = new Date();
+                const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                document.getElementById('weekday').textContent = weekdays[now.getDay()];
+                document.getElementById('time').textContent = now.toTimeString().slice(0, 8);
+            } catch (e) {
+                console.error('updateTime Error:', e);
+            }
         }
 
         function updateProgress() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-            const daysInYear = isLeapYear ? 366 : 365;
+            try {
+                const now = new Date();
+                const year = now.getFullYear();
+                const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+                const daysInYear = isLeapYear ? 366 : 365;
 
-            // 年进度
-            const startOfYear = new Date(year, 0, 1);
-            const daysPassedYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-            const yearProgress = (daysPassedYear / daysInYear) * 100;
-            document.getElementById('year-progress').style.width = `${yearProgress}%`;
-            document.getElementById('year-text').textContent = `${daysPassedYear}/${daysInYear}`;
+                // 年进度
+                const startOfYear = new Date(year, 0, 1);
+                const daysPassedYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                const yearProgress = (daysPassedYear / daysInYear) * 100;
+                document.getElementById('year-progress').style.width = `${yearProgress}%`;
+                document.getElementById('year-text').textContent = `${daysPassedYear}/${daysInYear}`;
 
-            // 月进度
-            const startOfMonth = new Date(year, now.getMonth(), 1);
-            const endOfMonth = new Date(year, now.getMonth() + 1, 0);
-            const daysInMonth = endOfMonth.getDate();
-            const daysPassedMonth = now.getDate() - 1;
-            const monthProgress = (daysPassedMonth / daysInMonth) * 100;
-            document.getElementById('month-progress').style.width = `${monthProgress}%`;
-            document.getElementById('month-text').textContent = `${daysPassedMonth}/${daysInMonth}`;
+                // 月进度
+                const startOfMonth = new Date(year, now.getMonth(), 1);
+                const endOfMonth = new Date(year, now.getMonth() + 1, 0);
+                const daysInMonth = endOfMonth.getDate();
+                const daysPassedMonth = now.getDate() - 1;
+                const monthProgress = (daysPassedMonth / daysInMonth) * 100;
+                document.getElementById('month-progress').style.width = `${monthProgress}%`;
+                document.getElementById('month-text').textContent = `${daysPassedMonth}/${daysInMonth}`;
 
-            // 周进度（仍基于日进度，显示小时）
-            const hoursPassed = now.getHours() + now.getMinutes() / 60;
-            const weekProgress = (hoursPassed / 24) * 100;
-            document.getElementById('week-progress').style.width = `${weekProgress}%`;
-            document.getElementById('week-text').textContent = `${Math.floor(hoursPassed)}/24`;
+                // 周进度（基于日，显示小时）
+                const hoursPassed = now.getHours() + now.getMinutes() / 60;
+                const weekProgress = (hoursPassed / 24) * 100;
+                document.getElementById('week-progress').style.width = `${weekProgress}%`;
+                document.getElementById('week-text').textContent = `${Math.floor(hoursPassed)}/24`;
+            } catch (e) {
+                console.error('updateProgress Error:', e);
+            }
         }
 
         // 初始更新
-        updateTime();
-        updateProgress();
-
-        // 每秒更新时间
-        setInterval(updateTime, 1000);
-        // 每分钟更新进度条
-        setInterval(updateProgress, 60000);
+        try {
+            updateTime();
+            updateProgress();
+            // 每秒更新时间
+            setInterval(updateTime, 1000);
+            // 每分钟更新进度条
+            setInterval(updateProgress, 60000);
+        } catch (e) {
+            console.error('Initialization Error:', e);
+        }
     </script>
 </body>
 </html>
